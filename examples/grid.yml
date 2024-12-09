@@ -1,0 +1,11 @@
+param1:
+  min: 0
+  max: 10
+  dist: linear
+  num: 5
+
+param2:
+  min: 0.0001
+  max: 0.01
+  dist: log
+  num: 5
