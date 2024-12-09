@@ -50,18 +50,19 @@ class Grid:
         return grid
 
     def init(self, sql_path=None, if_exists="skip") -> Path:
-        """_summary_
+        """
         Args:
             sql_path: Path to SQL database. If None, will use self.path.with_suffix(".db"). Defaults to None.
             if_exists: One of 'fail', 'replace', 'append' or 'skip'. Defaults to 'skip'.
         """
-        if sql_path is None:
-            sql_path = self.path.with_suffix(".db")
+        sql_path = self.path.with_suffix(".db") if sql_path is None else Path(sql_path)
 
-        if Path(sql_path).exists() and if_exists == "skip":
-            print("Skipped db generation: File already exists")
+        if sql_path.exists() and if_exists == "skip":
             self.sql_path = Path(sql_path)
             return Path(sql_path)
+        elif if_exists == "skip":
+            # Skip but file does not exist. Create new one.
+            if_exists = "replace"
 
         conn = sqlite3.connect(sql_path)
         self.grid.to_sql("grid", conn, if_exists=if_exists, index=False)
