@@ -7,7 +7,7 @@ This project provides a grid search runner for parallel computing using SLURM jo
 - `examples/`: Contains example configuration files and scripts.
 - `gridsearch/`: Contains the main code for the grid search runner. 
   - `runner.py`: Contains the main logic for running the grid search.
-  - `manager.py`: Contains the logic for managing the grid and database.
+  - `grid.py`: Contains the logic for managing the grid and database.
 
 
 ## Installation

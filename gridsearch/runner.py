@@ -3,7 +3,7 @@ import sqlite3
 import subprocess
 from typing import Optional
 
-from gridsearch.manager import Grid
+from gridsearch.grid import Grid
 
 
 def get_next_pending_param(sql_path: str) -> Optional[dict]:
@@ -60,7 +60,12 @@ def param_generator(sql_path):
 
 
 class GridContextManager:
-    def __init__(self, config, if_exists):
+    def __init__(self, config: str, if_exists: str):
+        """
+        Args:
+            config: Path to the config file.
+            if_exists: One of 'fail', 'replace', 'append' or 'skip'.
+        """
         self.config = config
         self.if_exists = if_exists
         self.sql_path = None
@@ -68,21 +73,24 @@ class GridContextManager:
         self.row = None
 
     def __enter__(self):
+        """Initializes the grid search and SQLite connection."""
         self.grid = Grid(self.config)
         self.sql_path = self.grid.init(if_exists=self.if_exists)
         self.conn = sqlite3.connect(self.sql_path)
         return self
 
     def run_command(self, script_path):
+        """Runs the specified command with the next pending parameter combination."""
         param = next(param_generator(self.sql_path))
         self.row = param.pop("rowid")
         _ = param.pop("status")
         command = ["sbatch", script_path]
         for key, value in param.items():
             command.extend([f"--{key}", str(value)])
-        subprocess.run(command)
+        return subprocess.run(command)
 
     def __exit__(self, exc_type, exc_value, traceback):
+        """Update the status of the current row to 'completed' and close connection."""
         if self.conn:
             if self.row is not None:
                 self.conn.execute(
